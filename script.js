@@ -23,42 +23,29 @@ function loadData(text) {
         let currentRow = rows[i].split(" ");
         ri.push(currentRow[n]);
     }
-    // Find start and end positions, found on first column and last row
-    positions = [];
-    for (let i = 0; i < n && positions.length < 2; i++) {
-        let j = 0;
-        let index = i*n + j;
-        if (matrix[index] !== "N") {
-            positions.push({i});
-        }
-    }
-    for (let j = 0; j < n && positions.length < 2; j++) {
-        let i = n-1;
-        let index = i*n + j;
-        if (matrix[index] !== "N") {
-            positions.push({j});
-        }
-    }
 
-    return [matrix, ri, cj, positions];
+    return [matrix, ri, cj];
 }
 
 function reset() {
-    document.querySelector(".rowIndex")
-    document.querySelector(".colIndex")
-    document.querySelector(".rowRequi")
-    document.querySelector(".colRequi")
-    document.querySelector(".solution")
+    document.querySelector(".container").classList.add("inactive");
+    document.querySelector(".rowIndex").innerHTML = "";
+    document.querySelector(".colIndex").innerHTML = "";
+    document.querySelector(".rowRequi").innerHTML = "";
+    document.querySelector(".colRequi").innerHTML = "";
+    document.querySelector(".solution").innerHTML = "";
 }
 
 async function loadGrid(event) {
+    reset()
+
     // Read
     const file = event.target.files.item(0);
     const text = await file.text();
     text.replace("\r", "");
 
     // Parse data
-    const [matrix, ri, cj, positions] = loadData(text);
+    const [matrix, ri, cj] = loadData(text);
     const n = ri.length;  // Should be equal to cj.length
 
     // Set style that depends on n
@@ -68,6 +55,7 @@ async function loadGrid(event) {
     // Create elements for rowIndex
     for (let i = 1; i <= n; i++) {
         let child = document.createElement("div");
+        child.addEventListener("click", changeIndexClass)
         child.innerText = i;
         document.querySelector(".rowIndex").appendChild(child);
     }
@@ -75,25 +63,9 @@ async function loadGrid(event) {
     // Create elements for colIndex
     for (let j = 1; j <= n; j++) {
         let child = document.createElement("div");
+        child.addEventListener("click", changeIndexClass)
         child.innerText = j;
         document.querySelector(".colIndex").appendChild(child);
-    }
-
-    let startPosition = positions[0];
-    if ('i' in startPosition) {
-        document.querySelector(`.rowIndex :nth-child(${startPosition.i + 1})`).classList.add("startPosition");
-    }
-    else {
-        document.querySelector(`.colIndex :nth-child(${startPosition.j + 1})`).classList.add("startPosition");
-    }
-
-    
-    let endPosition = positions[1];
-    if ('i' in endPosition) {
-        document.querySelector(`.rowIndex :nth-child(${endPosition.i + 1})`).classList.add("endPosition");
-    }
-    else {
-        document.querySelector(`.colIndex :nth-child(${endPosition.j + 1})`).classList.add("endPosition");
     }
 
     // Create elements for rowRequi
@@ -119,6 +91,21 @@ async function loadGrid(event) {
             document.querySelector(".solution").appendChild(child);
         }
     }
+}
+
+function changeIndexClass() {
+    // This references the div where you click
+    if(this.classList.contains("startPosition")) {
+        this.classList.remove("startPosition");
+        this.classList.add("endPosition");
+    }
+    else if(this.classList.contains("endPosition")) {
+        this.classList.remove("endPosition");
+    }
+    else {
+        this.classList.add("startPosition");
+    }
+
 }
 
 document.querySelector("#opti-file").onchange = loadGrid;
